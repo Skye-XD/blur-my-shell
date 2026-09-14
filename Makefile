@@ -1,5 +1,5 @@
 NAME = blur-my-shell
-UUID = $(NAME)@aunetx
+UUID = $(NAME)@skye-xd.github.io
 VM_PATH = ~/Projects/shared/extensions
 
 .PHONY: build install pot test-shell test-prefs remove clean
