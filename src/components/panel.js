@@ -242,6 +242,17 @@ export const PanelBlur = class PanelBlur {
         };
         this.actors_list.push(actors);
 
+        // Apply the background override to this panel now. connect_to_windows()
+        // only sweeps actors_list at the moment it runs, so a panel blurred
+        // afterwards -- secondary panels from extensions such as
+        // multi-monitors-bar appear once their monitors settle -- never gets
+        // the style class, and keeps painting its opaque background over the
+        // blur that was just inserted behind it.
+        if (this.settings.panel.OVERRIDE_BACKGROUND_DYNAMICALLY)
+            this.update_visibility();
+        else
+            this.set_should_override_panel(actors, true);
+
         // update the size of the actor
         this.update_size(actors);
 
