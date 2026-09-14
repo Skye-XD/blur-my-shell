@@ -294,17 +294,32 @@ export const PanelBlur = class PanelBlur {
             if (!monitor)
                 return;
 
+            // Every coordinate here is logical. On a fractionally scaled
+            // monitor a fractional logical coordinate falls inside a physical
+            // pixel, so the clip edge leaves a sliver of the panel unpainted
+            // and whatever sits behind the panel shows through it. Snapping is
+            // exact because these offsets are relative to the monitor origin,
+            // which is itself aligned to the physical grid.
+            const scale = global.display.get_monitor_scale(monitor.index);
+            const snap = value => Math.round(value * scale) / scale;
+
             // an alternative to panel.get_transformed_position, because it
             // sometimes yields NaN (probably when the actor is not fully
             // positionned yet)
             let [p_x, p_y] = panel_box.get_position();
             let [p_p_x, p_p_y] = panel_box.get_parent().get_position();
-            let x = p_x + p_p_x - monitor.x + (width - panel.width) / 2;
-            let y = p_y + p_p_y - monitor.y + (height - panel.height) / 2;
+            let box_x = snap(p_x + p_p_x - monitor.x);
+            let box_y = snap(p_y + p_p_y - monitor.y);
+            let pad_x = snap((width - panel.width) / 2);
+            let pad_y = snap((height - panel.height) / 2);
+            let x = box_x + pad_x;
+            let y = box_y + pad_y;
 
+            // pad - x == -box, so the wallpaper copy lands exactly on the
+            // monitor origin and the clip selects the region under the panel.
             background.set_clip(x, y, panel.width, panel.height);
-            background.x = (width - panel.width) / 2 - x;
-            background.y = .5 + (height - panel.height) / 2 - y;
+            background.x = pad_x - x;
+            background.y = pad_y - y;
         } else {
             background.x = panel.x;
             background.y = panel.y;
