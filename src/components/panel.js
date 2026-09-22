@@ -513,6 +513,20 @@ export const PanelBlur = class PanelBlur {
                 let panel_top = panel.get_transformed_position()[1];
                 let panel_bottom = panel_top + panel.get_height();
 
+                // Which half of its OWN monitor the panel sits in, rather
+                // than where it sits on the stage. Comparing the transformed
+                // y to 0 recognises a top panel only on a monitor whose
+                // logical origin is y=0, so a panel mirrored onto any monitor
+                // placed below that -- which is every secondary monitor in a
+                // vertically aligned layout -- was read as a bottom panel and
+                // tested against the wrong edge of each window.
+                //
+                // Midpoints rather than edges, so no tolerance is needed for
+                // a fractional transformed position under fractional scaling.
+                let is_top_panel =
+                    panel_top + panel.get_height() / 2
+                    < actors.monitor.y + actors.monitor.height / 2;
+
                 // check if at least a window is near enough the panel
                 let window_overlap_panel = false;
                 windows.forEach(meta_window => {
@@ -526,9 +540,9 @@ export const PanelBlur = class PanelBlur {
                     if (same_monitor
                         &&
                         // check if panel is on top
-                        ((panel_top === 0 && window_vertical_pos < panel_bottom + 5 * scale) ||
+                        ((is_top_panel && window_vertical_pos < panel_bottom + 5 * scale) ||
                         // check if panel is at the bottom
-                        (panel_top > 0 && window_vertical_bottom > panel_top - 5 * scale))
+                        (!is_top_panel && window_vertical_bottom > panel_top - 5 * scale))
                     )
                         window_overlap_panel = true;
                 });
