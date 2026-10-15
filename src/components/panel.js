@@ -631,6 +631,11 @@ export const PanelBlur = class PanelBlur {
             // can be done from its preferences anyway
             .filter(actors => !actors.is_dtp_panel)
             .forEach(actors => {
+                // findMonitorForActor() can come back empty, and the top or
+                // bottom test below is made against this panel's own monitor.
+                if (!actors.monitor)
+                    return;
+
                 let panel = actors.widgets.panel;
                 let panel_top = panel.get_transformed_position()[1];
                 let panel_bottom = panel_top + panel.get_height();
