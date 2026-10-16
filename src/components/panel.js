@@ -633,6 +633,10 @@ export const PanelBlur = class PanelBlur {
             .forEach(actors => {
                 // findMonitorForActor() can come back empty, and the top or
                 // bottom test below is made against this panel's own monitor.
+                // It is refreshed on every size update; until then, look again
+                // rather than leave the panel's override stale.
+                actors.monitor ??= Main.layoutManager.findMonitorForActor(
+                    actors.widgets.panel);
                 if (!actors.monitor)
                     return;
 
